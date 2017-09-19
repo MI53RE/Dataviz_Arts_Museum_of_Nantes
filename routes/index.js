@@ -31,14 +31,19 @@ router.get('/', function(req, res, next) {
     });
 
 
-    return Object.assign(item, {
-      _dimensions: getDimensions(item.Dimensions),
-      _techniques: getTechnique(item.Technique),
-      _supports: getSupport(item.Technique),
-      _date_creation: filterPeriod(item)
+    const cleanItem =  Object.assign({}, {
+      artist: item._artist,
+      obtention: {
+        year: item.Annee_acquisition,
+        type: item.Type_acquisition
+      },
+      dimensions: getDimensions(item.Dimensions),
+      techniques: getTechnique(item.Technique),
+      supports: getSupport(item.Technique),
+      date_creation: filterPeriod(item)
     });
+    db.clean.save(cleanItem);
   });
-  db.clean.save(data);
   res.render('index', { title: 'Express', data: data });
 });
 
@@ -49,7 +54,6 @@ function getDimensions(dimensions) {
     const split1 = splitX[0] ? splitX[0].split(' ') : ['', '', '', ''];
     const split2 = splitX[1] ? splitX[1].split(' ') : ['', '', '', ''];
     const split3 = splitX[2] ? splitX[2].split(' ') : ['', '', '', ''];
-    console.log(split1, split2, split3);
     switch (split1[0]) {
     case 'hauteur:':
       h = split1[1];
