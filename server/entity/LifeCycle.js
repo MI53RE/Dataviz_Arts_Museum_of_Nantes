@@ -7,7 +7,6 @@ let mongoose = require('mongoose');
 let LifeCycleSchema = mongoose.Schema({
     yearOfAcquisition: {type: Number},
     acquisitionType: {type: String},
-    acquisitionPrecision: {type: String},
     artwork: {type: mongoose.Schema.ObjectId, ref: 'Artwork'}
 });
 
