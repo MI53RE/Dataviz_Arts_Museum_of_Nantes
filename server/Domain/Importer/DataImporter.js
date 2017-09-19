@@ -27,6 +27,11 @@ const LifeCycle = require('./../../entity/LifeCycle');
  ********************************/
 /** Author data Converter */
 const BirthAndDeatDateConverter = require('./../dataConverter/author/BirthAndDeathDateConverter');
+/** Artwork data Converter */
+const DimensionDataConverter = require('./../dataConverter/artwork/DimensionsDataConverter');
+const TechniqueDataConverter = require('./../dataConverter/artwork/TechniqueDataConverter');
+const SupportDataConverter = require('./../dataConverter/artwork/SupportDataConverter');
+const CreationDateConverter = require('./../dataConverter/artwork/CreationDateConverter');
 
 /** load disk DB */
 <<<<<<< HEAD
@@ -90,35 +95,34 @@ let DataImporter = {
          * Persist Artworks
          ********************************/
         data.map((item) => {
-            Artwork.findOne({"title": item.title}, (err, artwork) => {
+
+            Artwork.findOne({"pictureLink": item.Lien_navigart}, (err, artwork) => {
                 if (err) throw err;
                 if (null == artwork) {
                     let artwork = new Artwork;
                     artwork.title = item.Titre;
-                    Author.findOne({"name": item.Auteur}, (err, author) => {
-                        if (err) throw err;
-                        artwork.author = author.get('_id');
-                    });
-                    artwork.creationDate = ""; //TODO
+                    artwork.author = Author.findOne({"name": item.Auteur}).exec().then(()=>{return author.get('_id')});
+                    CreationDateConverter.convert(item, artwork);
                     artwork.isExposed = item.lieu_exposition == null ? false : true;
                     artwork.field = item.Domaine;
-                    artwork.technique = ""; //TODO
-                    artwork.inventoryNumber = item.Annee_acquisition;
+                    TechniqueDataConverter.convert(item.Technique, artwork);
+                    SupportDataConverter.convert(item.Technique, artwork);
+                    artwork.inventoryNumber = item.No_inventaire;
                     artwork.pictureLink = item.Lien_navigart;
+                    DimensionDataConverter.convert(item.Dimensions, artwork);
 
                     Artwork.create(artwork);
 
                     let lifeCycle = new LifeCycle;
-                    lifeCycle.yearOfAcquisition = "";
-                    lifeCycle.acquisitionType = "";
-                    lifeCycle.acquisitionPrecision = "";
+                    lifeCycle.yearOfAcquisition = item.Annee_acquisition;
+                    lifeCycle.acquisitionType = item.Type_acquisition;
                     lifeCycle.artwork = artwork.get("_id");
 
                     LifeCycle.create(lifeCycle);
 
                     artwork.lifeCycle = lifeCycle.get("_id");
 
-                    Artwork.save(artwork);
+                    artwork.save();
                 }
                 alreadyExist = false;
             })

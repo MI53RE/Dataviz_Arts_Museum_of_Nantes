@@ -12,10 +12,18 @@ let AuthorSchema = mongoose.Schema({
     Artworks: [{type: mongoose.Schema.ObjectId, ref: 'Artwork'}]
 });
 
-AuthorSchema.methods.findByName = (name, callback) => {
-    return this.find({name: name}, callback);
-};
-
 let Author = mongoose.model('Author', AuthorSchema);
+
+exports.findAuthor = (name, callback) => {
+    Author.findOne({name: name}, function(err, userObj){
+        if(err){
+            return callback(err);
+        } else if (userObj){
+            return callback(null,userObj);
+        } else {
+            return callback();
+        }
+    });
+};
 
 module.exports = Author;

@@ -7,13 +7,15 @@ let mongoose = require('mongoose');
 let ArtworkSchema = mongoose.Schema({
     title: {type: String},
     author: {type: mongoose.Schema.ObjectId, ref: 'Author'},
-    creationDate: {type: Number},
+    creationDate: {type: Object},
     isExposed: {type: Boolean},
     field: {type: String},
-    technique: {type: String},
+    technique: {type: Array},
+    support: {type: Array},
     width: {type: Number},
     height: {type: Number},
     depth: {type: Number},
+    diameter: {type: Number},
     inventoryNumber: {type: Number},
     pictureLink: {type: String},
     LifeCycle: {type: mongoose.Schema.ObjectId, ref: 'LifeCycle'}
