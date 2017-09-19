@@ -7,8 +7,6 @@ router.get('/', function(req, res, next) {
   db.connect('./databases/', ['source', 'clean']);
   const data = db.source.find();
   data.map((item) => {
-    const dimensions = item.Dimensions ? item.Dimensions.split(' x ') : ['', '', ''];
-    const date = {from: '', to: ''};
     let dnda = {
       birthplace: '',
       birthdate: '',
@@ -32,80 +30,165 @@ router.get('/', function(req, res, next) {
       }
     });
 
-    filterPeriod('s.d.', item.Date_creation, () => {
-      date.from = dnda.birthdate;
-      date.to = dnda.deathdate;
-    });
-    filterPeriod('XVIe', item.Date_creation, () => {
-      date.from = '1500';
-      date.to = '1599';
-    });
-    filterPeriod('XVIIe', item.Date_creation, () => {
-      date.from = '1600';
-      date.to = '1699';
-    });
-    filterPeriod('XVIIIe', item.Date_creation, () => {
-      date.from = '1700';
-      date.to = '1799';
-    });
-    filterPeriod('XIXe', item.Date_creation, () => {
-      date.from = '1800';
-      date.to = '1899';
-    });
-    filterPeriod('XXe', item.Date_creation, () => {
-      date.from = '1900';
-      date.to = '1999';
-    });
-
 
     return Object.assign(item, {
-      _dimensions: {
-        height: typeof dimensions[0] === 'string' ? dimensions[0].split(' ')[0] : '',
-        width: typeof dimensions[1] === 'string' ? dimensions[1].split(' ')[0] : '',
-        depth: typeof dimensions[2] === 'string' ? dimensions[2].split(' ')[0] : ''
-      },
-      _date_creation: {
-        from: date.from,
-        to: date.to
-      }
+      _dimensions: getDimensions(item.Dimensions),
+      _techniques: getTechnique(item.Technique),
+      _supports: getSupport(item.Technique),
+      _date_creation: filterPeriod(item)
     });
-    // 'Annee_acquisition': item.
-    // 'Auteur':
-    // 'Date_creation':
-    // 'Dates_naissance_deces_artiste':
-    // 'Dimensions':
-    // 'Domaine':
-    // 'Lien_Navigart':
-    // 'Lieu_exposition':
-    // 'No_inventaire':
-    // 'Précisions_acquisition':
-    // 'Technique':
-    // 'Titre':
-    // 'Type_acquisition':
   });
   db.clean.save(data);
   res.render('index', { title: 'Express', data: data });
 });
 
-function filterPeriod(item) {
-  const periods = {
-    'XVIe':  ['1500', '1599'],
-    'XVIIe':  ['1600', '1699'],
-    'XVIIIe':  ['1700', '1799'],
-    'XIXe':  ['1800', '1899'],
-    'XXe': ['1900', '1999']
+function getDimensions(dimensions) {
+  let h = '', w = '', d = '', dia = '';
+  if (dimensions) {
+    const splitX = dimensions.split(' x ');
+    const split1 = splitX[0] ? splitX[0].split(' ') : ['', '', '', ''];
+    const split2 = splitX[1] ? splitX[1].split(' ') : ['', '', '', ''];
+    const split3 = splitX[2] ? splitX[2].split(' ') : ['', '', '', ''];
+    console.log(split1, split2, split3);
+    switch (split1[0]) {
+    case 'hauteur:':
+      h = split1[1];
+      break;
+    case 'diamètre:':
+      dia = split1[1];
+      break;
+    case 'profondeur:':
+      d = split1[1];
+      break;
+    default:
+      h = split1[0];
+      break;
+    }
+    switch (split2[0]) {
+    case 'hauteur:':
+      h = split2[1];
+      break;
+    case 'diamètre:':
+      dia = split2[1];
+      break;
+    case 'profondeur:':
+      d = split2[1];
+      break;
+    default:
+      w = split2[0];
+      break;
+    }
+    switch (split3[0]) {
+    case 'hauteur:':
+      h = split3[1];
+      break;
+    case 'diamètre:':
+      dia = split3[1];
+      break;
+    case 'profondeur:':
+      d = split3[1];
+      break;
+    default:
+      d = split3[0];
+      break;
+    }
+  }
+  return {
+    height: h,
+    width: w,
+    depth: d,
+    diameter: dia 
   };
-  for (period in periods) {
-    let regex = new RegExp('/' + period + '/i');
-    if (regex.test(item.Date_creation)) {
+}
+const periods = {
+  'XVIe':  ['1500', '1599'],
+  'XVIIe':  ['1600', '1699'],
+  'XVIIIe':  ['1700', '1799'],
+  'XIXe':  ['1800', '1899'],
+  'XXe': ['1900', '1999']
+};
+
+const techniques = [
+  'pierre noire',
+  'craie',
+  'sanguine',
+  'mine de plomb',
+  'fusain',
+  'plume',
+  'encre',
+  'gouache',
+  'huile',
+  'aquarelle',
+  'pastel',
+  'eau-forte',
+  'eau forte',
+  'lithographie',
+  'estampe',
+  'crayon',
+  'lavis',
+  'draperie',
+  'mise au carreau',
+  'rehaussé',
+  'frottis',
+  'mine graphite',
+  'gravure',
+  'burin',
+  'cannif',
+  'tirage',
+  'epreuve',
+  'illustration',
+];
+
+const supports = [
+  'toile',
+  'bois',
+  'bronze',
+  'plâtre',
+  'platre',
+  'marbre',
+  'papier contrecollé sur papier',
+  'papier',
+  'calque',
+  'pierre',
+  'carton',
+  'matrice cuivre',
+  'carnet'
+];
+
+function filterPeriod(item) {
+  for (let period in periods) {
+    if (typeof item.Date_creation === 'string' && item.Date_creation.indexOf(period) !== -1) {
       return {from: periods[period][0], to: periods[period][1]};
     }
   }
   if (/s\.d\./i.test(item.Date_creation)) {
     return {from: item._artist.birthdate, to: item._artist.deathdate};
   }
+  if (/[0-9]{4}?/i.test(item.Date_creation)) {
+    const dates = item.Date_creation.match(/[0-9]{4}?/ig);
+    return {from: dates[0] ? dates[0] : '', to: dates[1] ? dates[1] : (dates[0] ? dates[0] : '')};
+  }
+  return {from: '', to: ''};
+}
 
-  return false;
+function getTechnique(itemTechnique) {
+  const array = [];
+  techniques.map((technique) => {
+    if (itemTechnique && itemTechnique.toLowerCase().indexOf(technique) !== -1) {
+      array.push(technique);
+    }
+  });
+  return array;
+}
+
+function getSupport(itemTechnique) {
+  const array = [];
+  supports.map((support) => {
+    if (itemTechnique && itemTechnique.toLowerCase().indexOf(support) !== -1) {
+      array.push(support);
+    }
+  });
+  return array;
 }
 
 module.exports = router;
