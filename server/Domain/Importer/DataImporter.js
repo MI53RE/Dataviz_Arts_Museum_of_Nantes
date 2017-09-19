@@ -65,19 +65,13 @@ let DataImporter = {
          * Persist Artworks
          ********************************/
         data.map((item) => {
-            let author;
-
-            Author.findOne({"name": item.Auteur}, (err, author) => {
-                if (err) throw err;
-                return author = author;
-            });
 
             Artwork.findOne({"pictureLink": item.Lien_navigart}, (err, artwork) => {
                 if (err) throw err;
                 if (null == artwork) {
                     let artwork = new Artwork;
                     artwork.title = item.Titre;
-                    artwork.author = author.get('_id');
+                    artwork.author = Author.findOne({"name": item.Auteur}).exec().then(()=>{return author.get('_id')});
                     CreationDateConverter.convert(item, artwork);
                     artwork.isExposed = item.lieu_exposition == null ? false : true;
                     artwork.field = item.Domaine;
