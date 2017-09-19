@@ -4,6 +4,12 @@ const db = require('diskdb');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  db.connect('./databases/', ['clean']);
+  const data = db.clean.find();
+  res.render('index', { title: 'Express', data: data });
+});
+
+router.get('/regen-db', function(req, res, next) {
   db.connect('./databases/', ['source', 'clean']);
   const data = db.source.find();
   data.map((item) => {
@@ -37,6 +43,10 @@ router.get('/', function(req, res, next) {
         year: item.Annee_acquisition,
         type: item.Type_acquisition
       },
+      url: item.Lien_Navigart,
+      inventory_number: item.No_inventaire,
+      title: item.Titre,
+      field: item.Domaine,
       dimensions: getDimensions(item.Dimensions),
       techniques: getTechnique(item.Technique),
       supports: getSupport(item.Technique),
