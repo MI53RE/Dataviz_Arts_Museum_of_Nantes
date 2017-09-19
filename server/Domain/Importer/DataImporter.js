@@ -63,42 +63,35 @@ let DataImporter = {
             Artwork.findOne({"title": item.title}, (err, artwork) => {
                 if (err) throw err;
                 if (null == artwork) {
-                    for (let ii = 0; ii <= artworks.length; ii++) {
-                        if (undefined != artworks[ii] && null != artworks[ii]) {
-                            if (artworks[ii].get('title') == item.Titre) alreadyExist = true;
-                        }
-                    }
-                    if (!alreadyExist) {
-                        artwork = new Artwork;
-                        artwork.title = item.Titre;
-                        Author.findOne({"name": item.Auteur}, (err, author) => {
-                            if (err) throw err;
-                            artwork.author = author.get('_id');
-                        });
-                        artwork.creationDate = ""; //TODO
-                        artwork.isExposed = item.lieu_exposition == null ? false : true;
-                        artwork.field = item.Domaine;
-                        artwork.technique = ""; //TODO
-                        artwork.inventoryNumber = item.Annee_acquisition;
-                        artwork.pictureLink = item.Lien_navigart;
+                    let artwork = new Artwork;
+                    artwork.title = item.Titre;
+                    Author.findOne({"name": item.Auteur}, (err, author) => {
+                        if (err) throw err;
+                        artwork.author = author.get('_id');
+                    });
+                    artwork.creationDate = ""; //TODO
+                    artwork.isExposed = item.lieu_exposition == null ? false : true;
+                    artwork.field = item.Domaine;
+                    artwork.technique = ""; //TODO
+                    artwork.inventoryNumber = item.Annee_acquisition;
+                    artwork.pictureLink = item.Lien_navigart;
 
-                        Artwork.create(artwork);
-                        LifeCycle.create();
+                    Artwork.create(artwork);
 
-                        author.artworks.push(artwork);
-                        Author.save(author);
-                        artworks.push(artwork);
-                    }
-                    alreadyExist = false;
+                    let lifeCycle = new LifeCycle;
+                    lifeCycle.yearOfAcquisition = "";
+                    lifeCycle.acquisitionType = "";
+                    lifeCycle.acquisitionPrecision = "";
+                    lifeCycle.artwork = artwork.get("_id");
+
+                    LifeCycle.create(lifeCycle);
+
+                    artwork.lifeCycle = lifeCycle.get("_id");
+
+                    Artwork.save(artwork);
                 }
+                alreadyExist = false;
             })
-        });
-
-        /********************************
-         * Persist LifeCycle
-         ********************************/
-        data.map((item) => {
-
         });
     }
 };
