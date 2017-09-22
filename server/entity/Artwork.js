@@ -12,11 +12,11 @@ let ArtworkSchema = mongoose.Schema({
     field: {type: String},
     technique: {type: Array},
     support: {type: Array},
-    width: {type: Number},
-    height: {type: Number},
-    depth: {type: Number},
-    diameter: {type: Number},
-    inventoryNumber: {type: Number},
+    width: {type: String},
+    height: {type: String},
+    depth: {type: String},
+    diameter: {type: String},
+    inventoryNumber: {type: String},
     pictureLink: {type: String},
     LifeCycle: {type: mongoose.Schema.ObjectId, ref: 'LifeCycle'}
 });

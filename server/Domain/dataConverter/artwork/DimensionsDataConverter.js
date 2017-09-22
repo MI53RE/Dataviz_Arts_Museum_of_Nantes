@@ -53,10 +53,10 @@ let DimensionDataConverter = {
                   break;
           }
       }
-      artwork.width = w;
-      artwork.height = h;
-      artwork.depth = d;
-      artwork.diameter = dia;
+      artwork.width = parseFloat(w.replace(',', '.')) === "NaN" ? 0 : parseFloat(w.replace(',', '.'));
+      artwork.height = parseFloat(h.replace(',', '.')) === "NaN" ? 0 : parseFloat(h.replace(',', '.'));
+      artwork.depth = parseFloat(d.replace(',', '.')) === "NaN" ? 0 : parseFloat(d.replace(',', '.'));
+      artwork.diameter = parseFloat(dia.replace(',', '.')) === "NaN" ? 0 : parseFloat(dia.replace(',', '.'));
   }
 };
 

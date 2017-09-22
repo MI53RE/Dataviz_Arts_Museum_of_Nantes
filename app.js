@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 mongoose.connect("mongodb://127.0.0.1:27017/hackathon");
 
 const DataImporter = require('./server/Domain/Importer/DataImporter');
-DataImporter.import();
+// DataImporter.import();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

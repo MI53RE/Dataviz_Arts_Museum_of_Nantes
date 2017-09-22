@@ -24,7 +24,7 @@ let CreationDateConverter = {
             const dates = item.Date_creation.match(/[0-9]{4}?/ig);
             return {from: dates[0] ? dates[0] : '', to: dates[1] ? dates[1] : (dates[0] ? dates[0] : '')};
         }
-        artwork.creationDate = {from: '', to: ''};
+        return {from: '', to: ''};
     }
 };
 

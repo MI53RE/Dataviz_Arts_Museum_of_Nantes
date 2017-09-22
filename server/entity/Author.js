@@ -5,8 +5,8 @@ let mongoose = require('mongoose');
 
 let AuthorSchema = mongoose.Schema({
     name: {type: String, unique: true},
-    dateOfBirth: {type: Number},
-    dateOfDeath: {type: Number},
+    dateOfBirth: {type: String},
+    dateOfDeath: {type: String},
     placeOfBirth: {type: String},
     placeOfDeath: {type: String},
     Artworks: [{type: mongoose.Schema.ObjectId, ref: 'Artwork'}]
