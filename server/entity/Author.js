@@ -17,11 +17,11 @@ let Author = mongoose.model('Author', AuthorSchema);
 exports.findAuthor = (name, callback) => {
     Author.findOne({name: name}, function(err, userObj){
         if(err){
-            return callback(err);
+            return callback(err, null);
         } else if (userObj){
-            return callback(null,userObj);
+            return callback(null, userObj);
         } else {
-            return callback();
+            return callback(null, null);
         }
     });
 };
