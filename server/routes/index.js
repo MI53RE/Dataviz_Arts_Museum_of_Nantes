@@ -2,42 +2,77 @@ const express = require('express');
 const router = express.Router();
 const db = require('diskdb');
 
- const Author = require('./../entity/Author');
- const Artwork = require('./../entity/Artwork');
- const LifeCycle = require('./../entity/LifeCycle');
+const Author = require('./../entity/Author');
+const Artwork = require('./../entity/Artwork');
+const LifeCycle = require('./../entity/LifeCycle');
+const counters = {xvi: 0 ,xvii: 0, xviii: 0, xix: 0, xx: 0};
+const graphHeight = 460;
+
+const title = "le Musée d'Arts en détails."
+
+function loadInfo(callback) {
+  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; counters.xvi = count;
+    Artwork.count({"creationDate.from": {"$gte": "1600", "$lt": "1699"}}, (err, count) => {if (err) throw err; counters.xvii = count;
+      Artwork.count({"creationDate.from": {"$gte": "1700", "$lt": "1799"}}, (err, count) => {if (err) throw err; counters.xviii = count;
+        Artwork.count({"creationDate.from": {"$gte": "1800", "$lt": "1899"}}, (err, count) => {if (err) throw err; counters.xix = count;
+          Artwork.count({"creationDate.from": {"$gte": "1900", "$lt": "1999"}}, (err, count) => {if (err) throw err; counters.xx = count;
+            const sum = counters.xvi + counters.xvii + counters.xviii + counters.xix + counters.xx;
+            callback({
+              xvi: {
+                count: counters.xvi,
+                percent: counters.xvi / sum * 100,
+                height: graphHeight * (counters.xvi / sum),
+                posY: graphHeight - graphHeight * (counters.xvi / sum)
+              },
+              xvii: {
+                count: counters.xvii,
+                percent: counters.xvii / sum * 100,
+                height: graphHeight * (counters.xvii / sum),
+                posY: graphHeight - graphHeight * (counters.xvii / sum)
+              },
+              xviii: {
+                count: counters.xviii,
+                percent: counters.xviii / sum * 100,
+                height: graphHeight * (counters.xviii / sum),
+                posY: graphHeight - graphHeight * (counters.xviii / sum)
+              },
+              xix: {
+                count: counters.xix,
+                percent: counters.xix / sum * 100,
+                height: graphHeight * (counters.xix / sum),
+                posY: graphHeight - graphHeight * (counters.xix / sum)
+              },
+              xx: {
+                count: counters.xx,
+                percent: counters.xx / sum * 100,
+                height: graphHeight * (counters.xx / sum),
+                posY: graphHeight - graphHeight * (counters.xx / sum)
+              }
+            });
+          });
+        });
+      });
+    });
+  });
+}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  const counters = {xvi: 0,xvii: 0,xviii: 0,xix: 0,xx: 0};
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xvi = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xvii = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xviii = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xix = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xx = count});
-  console.log(counters);
-  res.render('index', { title: 'Test', data: counters });
+  loadInfo((data) => {
+    res.render('index', { title: title, data: data });
+  })
 });
 /* GET home page. */
 router.get('/2', function(req, res, next) {
-  const counters = {xvi: 0,xvii: 0,xviii: 0,xix: 0,xx: 0};
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xvi = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xvii = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xviii = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xix = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xx = count});
-  console.log(counters);
-  res.render('index2', { title: 'Test', data: counters });
+  loadInfo((data) => {
+    res.render('index2', { title: title, data: data });
+  })
 });
 /* GET home page. */
 router.get('/3', function(req, res, next) {
-  const counters = {xvi: 0,xvii: 0,xviii: 0,xix: 0,xx: 0};
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xvi = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xvii = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xviii = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xix = count});
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; return counters.xx = count});
-  console.log(counters);
-  res.render('index3', { title: 'Test', data: counters });
+  loadInfo((data) => {
+    res.render('index3', { title: title, data: data });
+  })
 });
 
 router.get('/regen-db', function(req, res, next) {
