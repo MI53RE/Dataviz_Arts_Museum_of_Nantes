@@ -28,9 +28,9 @@ function getSummariesByCenturies(callback) {
     xx: initSummary()
   };
   const total = initSummary();
-  Artwork.find((err, atworks) => {
+  Artwork.find((err, artworks) => {
     if (err) throw err;
-    atworks.map((artwork) => {
+    artworks.map((artwork) => {
       let idx = '';
       if (typeof artwork.creationDate === 'undefined') idx = 'unknown';
       else if (artwork.creationDate.from >= 1500 && artwork.creationDate.from <= 1599) idx = 'xvi';
@@ -40,28 +40,32 @@ function getSummariesByCenturies(callback) {
       else if (artwork.creationDate.from >= 1900 && artwork.creationDate.from <= 1999) idx = 'xx';
       else idx = 'unknown';
       data[idx].artworks.push(artwork);
-
-      const h = artwork.height !== 'NaN' ? parseFloat(artwork.height) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.height) : 0);
-      const w = artwork.width !== 'NaN' ? parseFloat(artwork.width) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.width) : 0);
+      const h = artwork.height !== 'NaN' ? parseFloat(artwork.height) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.diameter) : 0);
+      const w = artwork.width !== 'NaN' ? parseFloat(artwork.width) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.diameter) : 0);
       data[idx].volume.h += h;
       data[idx].volume.w += w;
+      data[idx].volume.surface = Math.round(Math.round(data[idx].volume.h * data[idx].volume.w) / 100) / 100;
       total.volume.h += h;
       total.volume.w += w;
-      data[idx].volume.surface = data[idx].volume.h * data[idx].volume.w;
-      total.volume.surface = total.volume.h * total.volume.w;
-
-      data[idx].counter.c += 1;
-      total.counter.c += 1;
     });
+    total.counter.c = artworks.length;
     for (idx in data) {
-      data[idx].volume.percent = data[idx].volume.surface / total.volume.surface * 100;
-      data[idx].volume.height = graphHeight * data[idx].volume.surface / total.volume.surface;
+      total.volume.surface += data[idx].volume.surface;
+    }
+    for (idx in data) {
+      data[idx].counter.c = data[idx].artworks.length;
+      data[idx].counter.percent = (data[idx].counter.c / total.counter.c) * 100;
+      data[idx].counter.height = (graphHeight * data[idx].counter.c) / total.counter.c;
+      data[idx].counter.posY = graphHeight - data[idx].counter.height;
+      
+      data[idx].volume.percent = (data[idx].volume.surface / total.volume.surface) * 100;
+      data[idx].volume.height = (graphHeight * data[idx].volume.surface) / total.volume.surface;
       data[idx].volume.posY = graphHeight - data[idx].volume.height;
 
-      data[idx].counter.percent = data[idx].counter.c / total.counter.c * 100;
-      data[idx].counter.height = graphHeight * data[idx].counter.c / total.counter.c;
-      data[idx].counter.posY = graphHeight - data[idx].counter.height;
+      console.log(idx, data[idx].volume);
+      // console.log(data[idx].counter);
     }
+    console.log('total', total.volume);
     callback(data);
   });
 }
@@ -74,22 +78,20 @@ router.get('/', function(req, res, next) {
 });
 /* GET home page. */
 router.get('/2', function(req, res, next) {
-  getCounts((count) => {
-    getVolumes((volume) => {
-      res.render('index2', { title: title, data: count, volume: volume });
-    })
+  getSummariesByCenturies((data) => {
+    res.render('index2', { title: title, data: data });
   })
 });
 /* GET home page. */
 router.get('/3', function(req, res, next) {
-  getCounts((data) => {
+  getSummariesByCenturies((data) => {
     res.render('index3', { title: title, data: data });
   })
 });
 /* GET home page. */
 router.get('/4', function(req, res, next) {
-  getVolumes((volume) => {
-    res.render('index4', { title: title, data: volume });
+  getSummariesByCenturies((data) => {
+    res.render('index4', { title: title, data: data });
   })
 });
 
