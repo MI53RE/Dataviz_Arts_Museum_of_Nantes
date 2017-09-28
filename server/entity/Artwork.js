@@ -2,9 +2,9 @@
  ********* Author Artwork
  ***********************************/
 
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-let ArtworkSchema = mongoose.Schema({
+const ArtworkSchema = mongoose.Schema({
     title: {type: String},
     author: {type: mongoose.Schema.ObjectId, ref: 'Author'},
     creationDate: {type: Object},
@@ -21,6 +21,6 @@ let ArtworkSchema = mongoose.Schema({
     LifeCycle: {type: mongoose.Schema.ObjectId, ref: 'LifeCycle'}
 });
 
-let Artwork = mongoose.model('Artwork', ArtworkSchema);
+const Artwork = mongoose.model('Artwork', ArtworkSchema);
 
 module.exports = Artwork;

@@ -2,14 +2,14 @@
  ********* Author LifeCycle
  ***********************************/
 
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-let LifeCycleSchema = mongoose.Schema({
+const LifeCycleSchema = mongoose.Schema({
     yearOfAcquisition: {type: Number},
     acquisitionType: {type: String},
     artwork: {type: mongoose.Schema.ObjectId, ref: 'Artwork'}
 });
 
-let LifeCycle = mongoose.model('LifeCycle', LifeCycleSchema);
+const LifeCycle = mongoose.model('LifeCycle', LifeCycleSchema);
 
 module.exports = LifeCycle;

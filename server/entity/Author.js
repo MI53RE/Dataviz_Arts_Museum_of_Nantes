@@ -1,9 +1,9 @@
 /***********************************
  ********* Author Entity
  ***********************************/
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-let AuthorSchema = mongoose.Schema({
+const AuthorSchema = mongoose.Schema({
     name: {type: String, unique: true},
     dateOfBirth: {type: String},
     dateOfDeath: {type: String},
@@ -12,7 +12,7 @@ let AuthorSchema = mongoose.Schema({
     Artworks: [{type: mongoose.Schema.ObjectId, ref: 'Artwork'}]
 });
 
-let Author = mongoose.model('Author', AuthorSchema);
+const Author = mongoose.model('Author', AuthorSchema);
 
 exports.findAuthor = (name, callback) => {
     Author.findOne({name: name}, function(err, userObj){

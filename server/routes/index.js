@@ -8,70 +8,88 @@ const LifeCycle = require('./../entity/LifeCycle');
 const counters = {xvi: 0 ,xvii: 0, xviii: 0, xix: 0, xx: 0};
 const graphHeight = 460;
 
-const title = "le Musée d'Arts en détails."
+const title = "le Musée d'Arts en détails.";
 
-function loadInfo(callback) {
-  Artwork.count({"creationDate.from": {"$gte": "1500", "$lt": "1599"}}, (err, count) => {if (err) throw err; counters.xvi = count;
-    Artwork.count({"creationDate.from": {"$gte": "1600", "$lt": "1699"}}, (err, count) => {if (err) throw err; counters.xvii = count;
-      Artwork.count({"creationDate.from": {"$gte": "1700", "$lt": "1799"}}, (err, count) => {if (err) throw err; counters.xviii = count;
-        Artwork.count({"creationDate.from": {"$gte": "1800", "$lt": "1899"}}, (err, count) => {if (err) throw err; counters.xix = count;
-          Artwork.count({"creationDate.from": {"$gte": "1900", "$lt": "1999"}}, (err, count) => {if (err) throw err; counters.xx = count;
-            const sum = counters.xvi + counters.xvii + counters.xviii + counters.xix + counters.xx;
-            callback({
-              xvi: {
-                count: counters.xvi,
-                percent: counters.xvi / sum * 100,
-                height: graphHeight * (counters.xvi / sum),
-                posY: graphHeight - graphHeight * (counters.xvi / sum)
-              },
-              xvii: {
-                count: counters.xvii,
-                percent: counters.xvii / sum * 100,
-                height: graphHeight * (counters.xvii / sum),
-                posY: graphHeight - graphHeight * (counters.xvii / sum)
-              },
-              xviii: {
-                count: counters.xviii,
-                percent: counters.xviii / sum * 100,
-                height: graphHeight * (counters.xviii / sum),
-                posY: graphHeight - graphHeight * (counters.xviii / sum)
-              },
-              xix: {
-                count: counters.xix,
-                percent: counters.xix / sum * 100,
-                height: graphHeight * (counters.xix / sum),
-                posY: graphHeight - graphHeight * (counters.xix / sum)
-              },
-              xx: {
-                count: counters.xx,
-                percent: counters.xx / sum * 100,
-                height: graphHeight * (counters.xx / sum),
-                posY: graphHeight - graphHeight * (counters.xx / sum)
-              }
-            });
-          });
-        });
-      });
+function initSummary() {
+  return {
+      artworks: [],
+      counter: {c: 0},
+      volume: {h: 0, w: 0, surface: 0, percent: 0}
+    }
+}
+
+function getSummariesByCenturies(callback) {
+  const data = {
+    unknown: initSummary(),
+    xvi: initSummary(),
+    xvii: initSummary(),
+    xviii: initSummary(),
+    xix: initSummary(),
+    xx: initSummary()
+  };
+  const total = initSummary();
+  Artwork.find((err, atworks) => {
+    if (err) throw err;
+    atworks.map((artwork) => {
+      let idx = '';
+      if (typeof artwork.creationDate === 'undefined') idx = 'unknown';
+      else if (artwork.creationDate.from >= 1500 && artwork.creationDate.from <= 1599) idx = 'xvi';
+      else if (artwork.creationDate.from >= 1600 && artwork.creationDate.from <= 1699) idx = 'xvii';
+      else if (artwork.creationDate.from >= 1700 && artwork.creationDate.from <= 1799) idx = 'xviii';
+      else if (artwork.creationDate.from >= 1800 && artwork.creationDate.from <= 1899) idx = 'xix';
+      else if (artwork.creationDate.from >= 1900 && artwork.creationDate.from <= 1999) idx = 'xx';
+      else idx = 'unknown';
+      data[idx].artworks.push(artwork);
+
+      const h = artwork.height !== 'NaN' ? parseFloat(artwork.height) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.height) : 0);
+      const w = artwork.width !== 'NaN' ? parseFloat(artwork.width) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.width) : 0);
+      data[idx].volume.h += h;
+      data[idx].volume.w += w;
+      total.volume.h += h;
+      total.volume.w += w;
+      data[idx].volume.surface = data[idx].volume.h * data[idx].volume.w;
+      total.volume.surface = total.volume.h * total.volume.w;
+
+      data[idx].counter.c += 1;
+      total.counter.c += 1;
     });
+    for (idx in data) {
+      data[idx].volume.percent = data[idx].volume.surface / total.volume.surface * 100;
+      data[idx].volume.height = graphHeight * data[idx].volume.surface / total.volume.surface;
+      data[idx].volume.posY = graphHeight - data[idx].volume.height;
+
+      data[idx].counter.percent = data[idx].counter.c / total.counter.c * 100;
+      data[idx].counter.height = graphHeight * data[idx].counter.c / total.counter.c;
+      data[idx].counter.posY = graphHeight - data[idx].counter.height;
+    }
+    callback(data);
   });
 }
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  loadInfo((data) => {
+  getSummariesByCenturies((data) => {
     res.render('index', { title: title, data: data });
   })
 });
 /* GET home page. */
 router.get('/2', function(req, res, next) {
-  loadInfo((data) => {
-    res.render('index2', { title: title, data: data });
+  getCounts((count) => {
+    getVolumes((volume) => {
+      res.render('index2', { title: title, data: count, volume: volume });
+    })
   })
 });
 /* GET home page. */
 router.get('/3', function(req, res, next) {
-  loadInfo((data) => {
+  getCounts((data) => {
     res.render('index3', { title: title, data: data });
+  })
+});
+/* GET home page. */
+router.get('/4', function(req, res, next) {
+  getVolumes((volume) => {
+    res.render('index4', { title: title, data: volume });
   })
 });
 
