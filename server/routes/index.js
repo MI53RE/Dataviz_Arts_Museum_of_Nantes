@@ -5,92 +5,37 @@ const db = require('diskdb');
 const Author = require('./../entity/Author');
 const Artwork = require('./../entity/Artwork');
 const LifeCycle = require('./../entity/LifeCycle');
-const counters = {xvi: 0 ,xvii: 0, xviii: 0, xix: 0, xx: 0};
-const graphHeight = 460;
+const conf = {
+  graphHeight: 460,
+};
 
 const title = "le Musée d'Arts en détails.";
 
-function initSummary() {
-  return {
-      artworks: [],
-      counter: {c: 0},
-      volume: {h: 0, w: 0, surface: 0, percent: 0}
-    }
-}
-
-function getSummariesByCenturies(callback) {
-  const data = {
-    unknown: initSummary(),
-    xvi: initSummary(),
-    xvii: initSummary(),
-    xviii: initSummary(),
-    xix: initSummary(),
-    xx: initSummary()
-  };
-  const total = initSummary();
-  Artwork.find((err, artworks) => {
-    if (err) throw err;
-    artworks.map((artwork) => {
-      let idx = '';
-      if (typeof artwork.creationDate === 'undefined') idx = 'unknown';
-      else if (artwork.creationDate.from >= 1500 && artwork.creationDate.from <= 1599) idx = 'xvi';
-      else if (artwork.creationDate.from >= 1600 && artwork.creationDate.from <= 1699) idx = 'xvii';
-      else if (artwork.creationDate.from >= 1700 && artwork.creationDate.from <= 1799) idx = 'xviii';
-      else if (artwork.creationDate.from >= 1800 && artwork.creationDate.from <= 1899) idx = 'xix';
-      else if (artwork.creationDate.from >= 1900 && artwork.creationDate.from <= 1999) idx = 'xx';
-      else idx = 'unknown';
-      data[idx].artworks.push(artwork);
-      const h = artwork.height !== 'NaN' ? parseFloat(artwork.height) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.diameter) : 0);
-      const w = artwork.width !== 'NaN' ? parseFloat(artwork.width) : (artwork.diameter !== 'NaN' ? parseFloat(artwork.diameter) : 0);
-      data[idx].volume.h += h;
-      data[idx].volume.w += w;
-      data[idx].volume.surface = Math.round(Math.round(data[idx].volume.h * data[idx].volume.w) / 100) / 100;
-      total.volume.h += h;
-      total.volume.w += w;
-    });
-    total.counter.c = artworks.length;
-    for (idx in data) {
-      total.volume.surface += data[idx].volume.surface;
-    }
-    for (idx in data) {
-      data[idx].counter.c = data[idx].artworks.length;
-      data[idx].counter.percent = (data[idx].counter.c / total.counter.c) * 100;
-      data[idx].counter.height = (graphHeight * data[idx].counter.c) / total.counter.c;
-      data[idx].counter.posY = graphHeight - data[idx].counter.height;
-      
-      data[idx].volume.percent = (data[idx].volume.surface / total.volume.surface) * 100;
-      data[idx].volume.height = (graphHeight * data[idx].volume.surface) / total.volume.surface;
-      data[idx].volume.posY = graphHeight - data[idx].volume.height;
-
-      console.log(idx, data[idx].volume);
-      // console.log(data[idx].counter);
-    }
-    console.log('total', total.volume);
-    callback(data);
-  });
-}
+Artwork.setConf(conf)
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  getSummariesByCenturies((data) => {
+  Artwork.getSummariesByCenturies((data) => {
     res.render('index', { title: title, data: data });
   })
 });
 /* GET home page. */
 router.get('/2', function(req, res, next) {
-  getSummariesByCenturies((data) => {
+  Artwork.getSummariesByCenturies((data) => {
+  // Artwork.getCountByCenturies((data) => {
     res.render('index2', { title: title, data: data });
   })
 });
 /* GET home page. */
 router.get('/3', function(req, res, next) {
-  getSummariesByCenturies((data) => {
+  Artwork.getSummariesByCenturies((data) => {
     res.render('index3', { title: title, data: data });
   })
 });
 /* GET home page. */
 router.get('/4', function(req, res, next) {
-  getSummariesByCenturies((data) => {
+  Artwork.getSummariesByCenturies((data) => {
+  // Artwork.getVolumeByCenturies((data) => {
     res.render('index4', { title: title, data: data });
   })
 });
